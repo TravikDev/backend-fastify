@@ -1,7 +1,7 @@
 import Fastify from 'fastify'
 import drizzle from './plugins/drizzle'
-import { db } from './db'
-import { usersTable } from './db/schema'
+// import { db } from './db'
+// import { usersTable } from './db/schema'
 import routes from './routes/route'
 
 //@ts-ignore

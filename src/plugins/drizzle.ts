@@ -1,26 +1,33 @@
+'use strict'
+
 import fp from 'fastify-plugin';
 import { FastifyInstance } from 'fastify';
 import { db } from '../db';
 
-async function drizzlePlugin(fastify: FastifyInstance) {
-    fastify.decorate('db', db);
+function drizzlePlugin(fastify: FastifyInstance, options: any, done: any) {
+	if (!fastify.drizzle) {
+		const drizzle = db(options)
+		fastify.decorate('drizzle', drizzle);
 
-    fastify.addHook('onClose', async (instance, done) => {
-        //@ts-ignore
-        await db.dispose();
-        done();
-    });
+		fastify.addHook('onClose', (fastify: FastifyInstance, done) => {
+			if (fastify.drizzle === drizzle) {
+				fastify.drizzle.destroy(done)
+			}
+		});
+	}
+
+	done();
 }
 
-export default fp(drizzlePlugin,
-    // {
-    //     name: 'my-encapsulated-drizzle-plugin',
-    //     fastify: '5.x',
-    //     decorators: {
-    //         fastify: ['plugin1', 'plugin2'],
-    //         reply: ['compress']
-    //     },
-    //     dependencies: ['plugin1-name', 'plugin2-name'],
-    //     encapsulate: true
-    // }
+export default fp(drizzlePlugin, { name: 'fastify-drizzle-plugin' }
+	// {
+	//     name: 'my-encapsulated-drizzle-plugin',
+	//     fastify: '5.x',
+	//     decorators: {
+	//         fastify: ['plugin1', 'plugin2'],
+	//         reply: ['compress']
+	//     },
+	//     dependencies: ['plugin1-name', 'plugin2-name'],
+	//     encapsulate: true
+	// }
 );
